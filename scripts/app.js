@@ -1,8 +1,24 @@
 //import { mat4 } from "./gl-matrix";
 
+let hasInit = false;
+
 document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOMCONTENT");
-    InitDemo();
+    //InitDemo();
+
+    let canvas = document.getElementById('application');
+    // Resize canvas
+    canvas.style.width = "100vw";
+    canvas.style.height = "100vh";
+});
+
+document.addEventListener("mousedown", (event) => {
+    if(!hasInit){
+        InitDemo();
+        document.getElementById('splash').style.display = 'none';
+        hasInit = true;
+    }
+    //console.log("Mouse Down");
 });
 
 var vertexShaderText = 
@@ -36,16 +52,16 @@ var fragmentShaderText =
 '}',
 ].join('\n');
 
-var InitDemo = function(){
-    console.log("This works");
+var InitDemo = function() {
 
-    document.getElementById('splash').style.display = 'none';
     var canvas = document.getElementById('application');
-    var gl = canvas.getContext('webgl');
+    var gl = canvas.getContext('webgl2');
     if(!gl) {
         console.log("WebGL not supported, falling back on experimental");
         gl = canvas.getContext('experimental-webgl');
     }
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // <img> tag flips images
 
     gl.clearColor(0.75, 0.85, 0.8, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -87,15 +103,24 @@ var InitDemo = function(){
         return;
     }
 
+    
+    let uvB = (window.innerWidth / window.innerHeight) * 1.25066;
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+    console.log(uvB);
+
+    var uTop = 1.0;
+    var uBottom = 0.0 - ((1 - uvB) * (window.innerHeight / window.innerWidth));
+    
     // Create buffer
 
     var boxVertices = 
 	[ // X, Y, Z            U, V
 		// Front
-		1.0, 1.0, 1.0,      1.0, 2.0,
-		1.0, -1.0, 1.0,     1.0, 0.0,
-		-1.0, -1.0, 1.0,    0.0, 0.0,
-		-1.0, 1.0, 1.0,     0.0, 2.0,
+		1.0, 1.0, 1.0,      1.0, uTop,
+		1.0, -1.0, 1.0,     1.0, uBottom,
+		-1.0, -1.0, 1.0,    0.0, uBottom,
+		-1.0, 1.0, 1.0,     0.0, uTop,
 	];
 
 	var boxIndices =
@@ -139,7 +164,7 @@ var InitDemo = function(){
     // Create texture
     var boxTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -170,6 +195,9 @@ var InitDemo = function(){
     gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
     gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
     gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
+
+
+
 
 
     // Main Render Loop
