@@ -270,23 +270,27 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //gl.drawArrays(gl.TRIANGLES, 0, 3);
 
         currViewerID = targetViewerID;
+        let updateView = currViewerID != previousFrameViewerID;
 
-        var boxTexture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texImage2D( 
-            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            imageList[currViewerID][0]
-            );
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        if(updateView){
+            var boxTexture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texImage2D( 
+                gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                imageList[currViewerID][0]
+                );
+            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+            
+            gl.activeTexture(gl.TEXTURE0);
+            
+            gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+        }
         
-        gl.activeTexture(gl.TEXTURE0);
-        
-        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 
         // update fps at last
         var now = new Date().getTime();
@@ -300,12 +304,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             fpsElement.innerHTML = fps;
         }
 
-        if(currViewerID != previousFrameViewerID){
+        if(updateView)
+            gl.bindTexture(gl.TEXTURE_2D, null);
 
-        }
         currViewerID = previousFrameViewerID;
         
-        gl.bindTexture(gl.TEXTURE_2D, null);
+
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
