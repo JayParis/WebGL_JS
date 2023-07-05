@@ -319,6 +319,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         previousFrameViewerID = vID;
 
+        gl.finish();
+
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
