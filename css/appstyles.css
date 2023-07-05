@@ -16,6 +16,11 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+#fps {
+    position: fixed;
+    color: #ffffff;
+}
+
 #splash {
     display: block;
     position: absolute;

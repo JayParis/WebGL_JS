@@ -2,57 +2,103 @@
 
 let hasInit = false;
 
+var imageList = [];
+var bmpOrder = [];
+
+const _supabaseUrl = 'https://cfzcrwfmlxquedvdajiw.supabase.co';
+const _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmemNyd2ZtbHhxdWVkdmRhaml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODc3ODM3MjksImV4cCI6MjAwMzM1OTcyOX0.ISyn717q7x4h9SXUtn0nj9U2jaTzmOHqmfjL5FiswYE";
+
+var isMobile = navigator.maxTouchPoints > 0;
+var tapPosVal = [0,0];
+var holdPosVal = [0,0];
+var inputting = false;
+
+const vSens = 0.55; //5
+var currViewerID = 0;
+var previousViewerID = 0;
+var previousFrameViewerID = 0;
+
+if(isMobile){
+    document.addEventListener("touchstart", e => { inputDown(e); });
+    document.addEventListener("touchmove", e => { inputMove(e); });
+    document.addEventListener("touchend", e => { inputUp(e); });
+}else{
+    document.addEventListener("mousedown", e => { inputDown(e); });
+    document.addEventListener("mousemove", e => { inputMove(e); });
+    document.addEventListener("mouseup", e => { inputUp(e); });
+}
+
 document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOMCONTENT");
-    //InitDemo();
 
     let canvas = document.getElementById('application');
     // Resize canvas
     canvas.style.width = "100vw";
     canvas.style.height = "100vh";
+
+    document.getElementById('my-image').crossOrigin = "anonymous"; // DELETE
 });
 
 document.addEventListener("mousedown", (event) => {
     if(!hasInit){
-        InitDemo();
+        loadImageURLs();
         document.getElementById('splash').style.display = 'none';
-        hasInit = true;
     }
     //console.log("Mouse Down");
 });
 
-var vertexShaderText = 
-[
-'precision mediump float;',
-'',
-'attribute vec3 vertPosition;',
-'attribute vec2 vertTexCoord;',
-'varying vec2 fragTexCoord;',
-'uniform mat4 mWorld;',
-'uniform mat4 mView;',
-'uniform mat4 mProj;',
-'',
-'void main()',
-'{',
-'   fragTexCoord = vertTexCoord;',
-'   gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);',
-'}',
-].join('\n');
+async function loadShadersAndRunDemo(){
 
-var fragmentShaderText = 
-[
-'precision mediump float;',
-'',
-'varying vec2 fragTexCoord;',
-'uniform sampler2D sampler;',
-'',
-'void main()',
-'{',
-'   gl_FragColor = texture2D(sampler, fragTexCoord);',
-'}',
-].join('\n');
+    const vertexShaderText = await fetch('./assets/shaders/main_vertex.glsl')
+        .then(result => result.text());
+    const fragmentShaderText = await fetch('./assets/shaders/main_fragment.glsl')
+        .then(result => result.text());
+    
+    hasInit = true;
+    RunDemo(vertexShaderText,fragmentShaderText);
+}
 
-var InitDemo = function() {
+function loadImageURLs(){
+    for (let i = 1; i <= 160; i+=1) { //160
+        let end = i.toString().padStart(4,'0');
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], i.toString(), {type: blob.type});
+                
+                var newImage = createImageBitmap(file).then(img => {
+                    imageList.push([img, i]);
+                    bmpOrder.push(i);
+                    
+                    console.log(i);
+
+                    if(imageList.length == 160)
+                        allImagesReady();
+                });
+            })
+    }
+    console.log("Finished Loading");
+}
+
+function allImagesReady(){
+
+    imageList.sort((a, b) => {
+        if(a[1] > b[1])
+            return 1;
+        if(a[1] < b[1])
+            return -1;
+        return 0;
+    });
+    
+    console.log(imageList[0]);
+    loadedPage = true;
+    console.log("Finished Sorting");
+
+    //viewer();
+    loadShadersAndRunDemo();
+}
+
+var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var canvas = document.getElementById('application');
     var gl = canvas.getContext('webgl2');
@@ -117,10 +163,10 @@ var InitDemo = function() {
     var boxVertices = 
 	[ // X, Y, Z            U, V
 		// Front
-		1.0, 1.0, 1.0,      1.0, uTop,
-		1.0, -1.0, 1.0,     1.0, uBottom,
-		-1.0, -1.0, 1.0,    0.0, uBottom,
-		-1.0, 1.0, 1.0,     0.0, uTop,
+		1.0, 1.0, 1.0,      1.0, 1 - uTop,
+		1.0, -1.0, 1.0,     1.0, 1 - uBottom,
+		-1.0, -1.0, 1.0,    0.0, 1 - uBottom,
+		-1.0, 1.0, 1.0,     0.0, 1 - uTop,
 	];
 
 	var boxIndices =
@@ -161,6 +207,7 @@ var InitDemo = function() {
     gl.enableVertexAttribArray(positionAttribLocation);
     gl.enableVertexAttribArray(texCoordAttribLocation);
 
+
     // Create texture
     var boxTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
@@ -171,7 +218,7 @@ var InitDemo = function() {
     gl.texImage2D( 
         gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
         gl.UNSIGNED_BYTE,
-        document.getElementById('my-image')
+        imageList[currViewerID][0]
         );
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -205,6 +252,10 @@ var InitDemo = function() {
     //var identityMatrix = new Float32Array(16);
     //mat4.identity(identityMatrix);
     //var angle = 0;
+
+    var fpsLastTick = new Date().getTime();
+    var fpsTri = [15, 15, 15]; // aims for 60fps
+
     var loop = function() {
         //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
         //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
@@ -220,7 +271,67 @@ var InitDemo = function() {
 
         gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 
+        // update fps at last
+        var now = new Date().getTime();
+        var frameTime = (now - fpsLastTick);
+        fpsTri.shift(); // drop one
+        fpsTri.push(frameTime); // append one
+        fpsLastTick = now;
+        fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
+        var fpsElement = document.getElementById('fps')
+        if (fpsElement) {
+            fpsElement.innerHTML = fps;
+        }
+
+        if(currViewerID != previousFrameViewerID){
+
+        }
+        currViewerID = previousFrameViewerID;
+
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
+}
+
+// Input events ---------------------------------------
+
+function inputDown(event) {
+    inputting = true;
+
+    event.preventDefault();
+
+    let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
+    let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
+
+    tapPosVal = [screenX, screenY];
+}
+
+function inputMove(event) {
+    if(!inputting)
+        return;
+
+    event.preventDefault();
+
+    let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
+    let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
+
+    holdPosVal = [screenX, screenY];
+    currViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 160));
+
+    //if(hasInit)
+    //    viewer();
+}
+
+function inputUp(event) {
+    previousViewerID = currViewerID;
+    inputting = false;
+
+    if(hasInit)
+        console.log(imageList.length);
+}
+
+// Helper methods ---------------------------------------
+
+function mod(n, m) {
+    return ((n % m) + m) % m;
 }
