@@ -14,6 +14,7 @@ var holdPosVal = [0,0];
 var inputting = false;
 
 const vSens = 0.55; //5
+var targetViewerID = 0;
 var currViewerID = 0;
 var previousViewerID = 0;
 var previousFrameViewerID = 0;
@@ -209,6 +210,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
 
     // Create texture
+    /*
     var boxTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
@@ -221,6 +223,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         imageList[currViewerID][0]
         );
     gl.bindTexture(gl.TEXTURE_2D, null);
+    */
 
 
     gl.useProgram(program); // Needs to know the program by this point
@@ -266,7 +269,22 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         //gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+        currViewerID = targetViewerID;
+
+        var boxTexture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D( 
+            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            imageList[currViewerID][0]
+            );
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        //gl.bindTexture(gl.TEXTURE_2D, null);
+        
         gl.activeTexture(gl.TEXTURE0);
 
         gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
@@ -316,14 +334,14 @@ function inputMove(event) {
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     holdPosVal = [screenX, screenY];
-    currViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 160));
+    targetViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 160));
 
     //if(hasInit)
     //    viewer();
 }
 
 function inputUp(event) {
-    previousViewerID = currViewerID;
+    previousViewerID = targetViewerID;
     inputting = false;
 
     if(hasInit)
