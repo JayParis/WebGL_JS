@@ -283,10 +283,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             imageList[currViewerID][0]
             );
         gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-        //gl.bindTexture(gl.TEXTURE_2D, null);
         
         gl.activeTexture(gl.TEXTURE0);
-
+        
         gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 
         // update fps at last
@@ -305,7 +304,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         }
         currViewerID = previousFrameViewerID;
-
+        
+        gl.bindTexture(gl.TEXTURE_2D, null);
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
