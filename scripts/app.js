@@ -60,7 +60,7 @@ async function loadShadersAndRunDemo(){
 }
 
 function loadImageURLs(){
-    for (let i = 1; i <= 160; i+=1) { //160
+    for (let i = 1; i <= 160; i += 2) { //160
         let end = i.toString().padStart(4,'0');
         fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
             .then(res => res.blob())
@@ -73,7 +73,7 @@ function loadImageURLs(){
                     
                     console.log(i);
 
-                    if(imageList.length == 160)
+                    if(imageList.length == 80)
                         allImagesReady();
                 });
             })
@@ -334,7 +334,7 @@ function inputMove(event) {
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     holdPosVal = [screenX, screenY];
-    targetViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 160));
+    targetViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 80));
 
     //if(hasInit)
     //    viewer();
