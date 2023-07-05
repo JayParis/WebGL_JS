@@ -10,7 +10,9 @@ const _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 var isMobile = navigator.maxTouchPoints > 0;
 var tapPosVal = [0,0];
-var holdPosVal = [0,0];
+var targetHoldPosVal = [0,0];
+var currentHoldPosVal_X = 0;
+var currentHoldPosVal_Y = 0;
 var inputting = false;
 
 const vSens = 0.55; //5
@@ -260,6 +262,13 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     var fpsTri = [15, 15, 15]; // aims for 60fps
 
     var loop = function() {
+
+        currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
+        currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
+        let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
+
+        let vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (currentCoord[0] * vSens)), 80));
+
         //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
         //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
         gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
@@ -269,10 +278,11 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         //gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-        currViewerID = targetViewerID;
-        let updateView = currViewerID != previousFrameViewerID;
+        //grabbedViewerID = targetViewerID;
 
-        if(updateView){
+        let updateView = vID != previousFrameViewerID;
+
+        if(true){
             var boxTexture = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, boxTexture);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
@@ -282,7 +292,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             gl.texImage2D( 
                 gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
                 gl.UNSIGNED_BYTE,
-                imageList[currViewerID][0]
+                imageList[vID][0]
                 );
             gl.bindTexture(gl.TEXTURE_2D, boxTexture);
             
@@ -301,14 +311,13 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
         var fpsElement = document.getElementById('fps')
         if (fpsElement) {
-            fpsElement.innerHTML = fps;
+            fpsElement.innerHTML = vID;
         }
 
         if(updateView)
             gl.bindTexture(gl.TEXTURE_2D, null);
 
-        currViewerID = previousFrameViewerID;
-        
+        previousFrameViewerID = vID;
 
         requestAnimationFrame(loop);
     };
@@ -326,6 +335,8 @@ function inputDown(event) {
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     tapPosVal = [screenX, screenY];
+    currentHoldPosVal_X = screenX;
+    currentHoldPosVal_Y = screenY;
 }
 
 function inputMove(event) {
@@ -337,8 +348,8 @@ function inputMove(event) {
     let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
-    holdPosVal = [screenX, screenY];
-    targetViewerID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (holdPosVal[0] * vSens)), 80));
+    targetHoldPosVal = [screenX, screenY];
+
 
     //if(hasInit)
     //    viewer();
@@ -348,6 +359,12 @@ function inputUp(event) {
     previousViewerID = targetViewerID;
     inputting = false;
 
+    let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
+    let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
+
+    currentHoldPosVal_X = screenX;
+    currentHoldPosVal_Y = screenY;
+
     if(hasInit)
         console.log(imageList.length);
 }
@@ -356,4 +373,11 @@ function inputUp(event) {
 
 function mod(n, m) {
     return ((n % m) + m) % m;
+}
+
+function MoveTowards(current, target, maxDelta) {
+    if (Math.abs(target - current) <= maxDelta) {
+        return target;
+    }
+    return current + Math.sign(target - current) * maxDelta;
 }
