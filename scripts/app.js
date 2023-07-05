@@ -263,11 +263,11 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var loop = function() {
 
-        currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
-        currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
-        let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
+        //currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
+        //currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
+        //let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
 
-        let vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (currentCoord[0] * vSens)), 80));
+        let vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (targetHoldPosVal[0] * vSens)), 80));
 
         //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
         //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
