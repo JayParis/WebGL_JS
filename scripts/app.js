@@ -20,6 +20,7 @@ var targetViewerID = 0;
 var currViewerID = 0;
 var previousViewerID = 0;
 var previousFrameViewerID = 0;
+let vID = 0;
 
 if(isMobile){
     document.addEventListener("touchstart", e => { inputDown(e); });
@@ -251,9 +252,21 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
     gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 
+    //let updateView = vID != previousFrameViewerID;
+    var boxTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); // MIRRORED_REPEAT
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-
-
+    gl.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        imageList[2][0]
+        );
+    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     // Main Render Loop
 
@@ -270,7 +283,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
         //let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
 
-        let vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (targetHoldPosVal[0] * vSens)), 80));
 
         //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
         //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
@@ -283,20 +295,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         //grabbedViewerID = targetViewerID;
 
-        let updateView = vID != previousFrameViewerID;
-        var boxTexture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-        gl.texImage2D( 
-            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+        gl.texSubImage2D( 
+            gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
             gl.UNSIGNED_BYTE,
             imageList[vID][0]
             );
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
         //gl.activeTexture(gl.TEXTURE0);
         
@@ -316,7 +320,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         }
 
         //if(updateView)
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        //gl.bindTexture(gl.TEXTURE_2D, null);
 
         previousFrameViewerID = vID;
 
@@ -337,41 +341,46 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 function inputDown(event) {
     inputting = true;
 
-    event.preventDefault();
-
     let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     tapPosVal = [screenX, screenY];
     currentHoldPosVal_X = screenX;
     currentHoldPosVal_Y = screenY;
+    targetHoldPosVal = [screenX, screenY];
+    
+    event.preventDefault();
 }
 
 function inputMove(event) {
     if(!inputting)
         return;
 
-    event.preventDefault();
 
     let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     targetHoldPosVal = [screenX, screenY];
+    vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (targetHoldPosVal[0] * vSens)), 80));
 
+
+    event.preventDefault();
 
     //if(hasInit)
     //    viewer();
 }
 
 function inputUp(event) {
-    previousViewerID = targetViewerID;
     inputting = false;
+    previousViewerID = vID;
 
     let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     currentHoldPosVal_X = screenX;
     currentHoldPosVal_Y = screenY;
+
+    targetHoldPosVal = [screenX, screenY];
 
     if(hasInit)
         console.log(imageList.length);
