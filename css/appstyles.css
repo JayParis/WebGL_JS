@@ -21,6 +21,17 @@ body {
     color: #ffffff;
 }
 
+#info {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.5em;
+    color: white;
+    background: rgba(0, 0, 0, 0.8);
+    white-space: pre;
+    font-family: monospace;
+}
+
 #splash {
     display: block;
     position: absolute;

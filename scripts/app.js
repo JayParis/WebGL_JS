@@ -110,6 +110,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl = canvas.getContext('experimental-webgl');
     }
 
+    const ext = gl.getExtension('GMAN_webgl_memory');
+    
+
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // <img> tag flips images
 
     gl.clearColor(0.75, 0.85, 0.8, 1.0);
@@ -181,11 +184,11 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var boxVertexBufferObject = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, boxVertexBufferObject);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STREAM_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW);
 
     var boxIndexBufferObject = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STREAM_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW);
 
     var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
     var texCoordAttribLocation = gl.getAttribLocation(program, 'vertTexCoord');
@@ -281,25 +284,23 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //grabbedViewerID = targetViewerID;
 
         let updateView = vID != previousFrameViewerID;
+        var boxTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-        if(true){
-            var boxTexture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texImage2D( 
-                gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                gl.UNSIGNED_BYTE,
-                imageList[vID][0]
-                );
-            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-            
-            gl.activeTexture(gl.TEXTURE0);
-            
-            gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
-        }
+        gl.texImage2D( 
+            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            imageList[vID][0]
+            );
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        
+        //gl.activeTexture(gl.TEXTURE0);
+        
+        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
         
 
         // update fps at last
@@ -314,12 +315,17 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             fpsElement.innerHTML = vID;
         }
 
-        if(updateView)
-            gl.bindTexture(gl.TEXTURE_2D, null);
+        //if(updateView)
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
         previousFrameViewerID = vID;
 
-        gl.finish();
+        //gl.finish();
+
+        if (ext) {
+            const info = ext.getMemoryInfo();
+            document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
+        }
 
         requestAnimationFrame(loop);
     };
