@@ -5,7 +5,7 @@ let hasInit = false;
 var imageList = [];
 var bmpOrder = [];
 
-var remoteImagesLoadStep = 2; // 1 for all images, 2 for every other
+var remoteImagesLoadStep = 1; // 1 for all images, 2 for every other
 
 const _supabaseUrl = 'https://cfzcrwfmlxquedvdajiw.supabase.co';
 const _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmemNyd2ZtbHhxdWVkdmRhaml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODc3ODM3MjksImV4cCI6MjAwMzM1OTcyOX0.ISyn717q7x4h9SXUtn0nj9U2jaTzmOHqmfjL5FiswYE";
