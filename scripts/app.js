@@ -169,21 +169,35 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     
 
-    let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
     //var fpsElement = document.getElementById('fps');
     //if (fpsElement) {
     //    fpsElement.innerHTML = "Width: " + window.innerWidth + "<br/>" + "Window height: " + window.innerHeight;
     //}
 
-    let uvB = (window.innerWidth * 1.25066) / window.innerHeight;
 
-    var uTop = 1.0;
-    var uBottom = 0.0 - ((1 - uvB) * (1 / uvB));
+    // OLD
+    /*
+    let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
+    sa_t = 100;
+    let uvB = (window.innerWidth * 1.25066) / window.innerHeight;
+    let aspectOffset = ((1 - uvB) * (1 / uvB));
+    let uvT = sa_t / window.innerHeight;
+    let topOffset = (uvT * (1 / uvB));
+
+    var uTop = 1.0 + topOffset;
+    var uBottom = (-aspectOffset) + topOffset;
+
     console.log(window.innerWidth);
     console.log(window.innerHeight);
     console.log(1 - uvB);
+    console.log("UVT: " + uvT);
+    */
 
-    
+    let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
+    var correctUV = fitImageToUV(window.innerWidth, window.innerHeight, sa_t);
+    var uTop = correctUV[0];
+    var uBottom = correctUV[1];
+
     // Create buffer
 
     var boxVertices = 
@@ -416,4 +430,18 @@ function MoveTowards(current, target, maxDelta) {
         return target;
     }
     return current + Math.sign(target - current) * maxDelta;
+}
+
+function fitImageToUV(containerWidth, containerHeight, safeArea){
+    let uvTop, uvBottom;
+
+    let v_B = (containerWidth * 1.25066) / containerHeight;
+    let a_off = ((1 - v_B) * (1 / v_B));
+    let v_T = safeArea / containerHeight;
+    let t_off = (v_T * (1 / v_B));
+
+    uvTop = 1.0 + t_off;
+    uvBottom = (-a_off) + t_off;
+
+    return [uvTop, uvBottom];
 }
