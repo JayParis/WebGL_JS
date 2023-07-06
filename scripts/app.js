@@ -5,6 +5,8 @@ let hasInit = false;
 var imageList = [];
 var bmpOrder = [];
 
+var remoteImagesLoadStep = 1; // 1 for all images, 2 for every other
+
 const _supabaseUrl = 'https://cfzcrwfmlxquedvdajiw.supabase.co';
 const _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmemNyd2ZtbHhxdWVkdmRhaml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODc3ODM3MjksImV4cCI6MjAwMzM1OTcyOX0.ISyn717q7x4h9SXUtn0nj9U2jaTzmOHqmfjL5FiswYE";
 
@@ -72,11 +74,9 @@ async function loadShadersAndRunDemo(){
 }
 
 function loadImageURLs(){
-    for (let i = 1; i <= 160; i += 2) { //160
+    for (let i = 1; i <= 160; i += remoteImagesLoadStep) { //160
         let end = i.toString().padStart(4,'0');
-        let path = _supabaseUrl + (i != 1 ? '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp' 
-            : '/storage/v1/object/public/main-pages/750/CardAlignment.jpg');
-        fetch(path)
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], i.toString(), {type: blob.type});
@@ -87,7 +87,7 @@ function loadImageURLs(){
                     
                     console.log(i);
 
-                    if(imageList.length == 80)
+                    if(imageList.length == (160 / remoteImagesLoadStep))
                         allImagesReady();
                 });
             })
@@ -360,8 +360,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //gl.finish();
 
         if (ext) { // Memory Info
-            //const info = ext.getMemoryInfo();
-            //document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
+            const info = ext.getMemoryInfo();
+            document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
         }
 
         requestAnimationFrame(loop);
@@ -394,7 +394,9 @@ function inputMove(event) {
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
 
     targetHoldPosVal = [screenX, screenY];
-    vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (targetHoldPosVal[0] * vSens)), 80));
+
+    let moduloVal = 160 / remoteImagesLoadStep;
+    vID = Math.abs(mod(previousViewerID + Math.trunc((tapPosVal[0] * vSens) - (targetHoldPosVal[0] * vSens)), moduloVal));
 
 
     event.preventDefault();
