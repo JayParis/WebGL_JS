@@ -5,7 +5,7 @@ let hasInit = false;
 var imageList = [];
 var bmpOrder = [];
 
-var remoteImagesLoadStep = 1; // 1 for all images, 2 for every other
+var remoteImagesLoadStep = 2; // 1 for all images, 2 for every other
 
 const _supabaseUrl = 'https://cfzcrwfmlxquedvdajiw.supabase.co';
 const _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmemNyd2ZtbHhxdWVkdmRhaml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODc3ODM3MjksImV4cCI6MjAwMzM1OTcyOX0.ISyn717q7x4h9SXUtn0nj9U2jaTzmOHqmfjL5FiswYE";
@@ -59,7 +59,19 @@ document.addEventListener("mousedown", (event) => {
         loadImageURLs();
         document.getElementById('splash').style.display = 'none';
     }
-    //console.log("Mouse Down");
+    let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
+    if(screenY < window.innerHeight * 0.25 && hasInit) {
+        //let path = _supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + vID.toString().padStart(4,'0') + '.webp'
+        //document.getElementById('my-image')
+        var canvas = document.getElementById('application');
+        var gl = canvas.getContext('webgl2');
+        gl.texSubImage2D( 
+            gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            document.getElementById('my-image')
+            );
+        console.log("Draw high res image");
+    }
 });
 
 async function loadShadersAndRunDemo(){

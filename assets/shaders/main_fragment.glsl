@@ -11,11 +11,15 @@ void main()
    const float Directions = 16.0;
    const float Quality = 4.0;
 
-   float bMask = smoothstep(0.5,0.0,v_UV.y);
-   float tMask = smoothstep(0.9,1.0,v_UV.y);
-   float comb = tMask + bMask;
+   float bm_t = smoothstep(0.9,1.0,v_UV.y);
+   float bm_b = smoothstep(0.5,0.0,v_UV.y);
+   float _blur = bm_t + bm_b;
 
-   float Radius = 0.025 * comb;
+   float dm_t = smoothstep(0.9,1.0,v_UV.y) * 0.7;
+   float dm_b = smoothstep(0.5,0.0,v_UV.y) * 0.9;
+   float _dark = dm_t + dm_b;
+
+   float Radius = 0.025 * _blur;
 
    vec4 Color = vec4(0);
 
@@ -28,6 +32,7 @@ void main()
    }
 
    Color /= Quality * Directions + 1.0;
-
+   Color *= 1.0 - _dark;
    gl_FragColor = vec4(Color.xyz, 1.0);
+   //gl_FragColor = vec4(_dark,_dark,_dark, 1.0);
 }
