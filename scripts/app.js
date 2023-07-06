@@ -177,6 +177,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     }
 
     let uvT = sa_t / window.innerHeight;
+    uvT = 0;
     console.log(uvT);
 
     var uTop = 1.0 + uvT;
