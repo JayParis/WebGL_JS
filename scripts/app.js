@@ -32,6 +32,8 @@ if(isMobile){
     document.addEventListener("mouseup", e => { inputUp(e); });
 }
 
+
+
 document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOMCONTENT");
 
@@ -39,6 +41,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
     // Resize canvas
     canvas.style.width = "100vw";
     canvas.style.height = "100vh";
+
+    if (window.document) {
+        document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top)');
+        document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom)');
+        document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left)');
+        document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right)');
+    }
 
     document.getElementById('my-image').crossOrigin = "anonymous"; // DELETE
 });
