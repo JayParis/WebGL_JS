@@ -198,6 +198,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     var uTop = correctUV[0];
     var uBottom = correctUV[1];
 
+    console.log("Width: " + window.innerWidth);
+    console.log("Height: " + window.innerHeight);
+
     // Create buffer
 
     var boxVertices = 
@@ -347,10 +350,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         fpsTri.push(frameTime); // append one
         fpsLastTick = now;
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
-        //var fpsElement = document.getElementById('fps');
-        //if (fpsElement) {
-        //    fpsElement.innerHTML = vID;
-        //}
+        var fpsElement = document.getElementById('fps');
+        if (fpsElement) {
+            fpsElement.innerHTML = fps;
+        }
 
         //if(updateView)
         //gl.bindTexture(gl.TEXTURE_2D, null);

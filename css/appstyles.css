@@ -26,9 +26,11 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    padding: 0.5em;
+    font-size: 7px;
+    margin-top: 40px;
+    padding: 0.25em;
     color: white;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.58);
     white-space: pre;
     font-family: monospace;
 }
