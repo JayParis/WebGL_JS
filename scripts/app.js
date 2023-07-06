@@ -171,7 +171,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     console.log(window.innerHeight);
     console.log(uvB);
 
-    let sa_t = getComputedStyle(document.documentElement).getPropertyValue("--sat");
+    let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
     var fpsElement = document.getElementById('fps');
     if (fpsElement) {
         fpsElement.innerHTML = "Safe area top: " + sa_t + "<br/>" + "Window height: " + window.innerHeight;
