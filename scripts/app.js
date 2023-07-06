@@ -74,7 +74,9 @@ async function loadShadersAndRunDemo(){
 function loadImageURLs(){
     for (let i = 1; i <= 160; i += 2) { //160
         let end = i.toString().padStart(4,'0');
-        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
+        let path = _supabaseUrl + (i != 1 ? '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp' 
+            : '/storage/v1/object/public/main-pages/750/CardAlignment.jpg');
+        fetch(path)
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], i.toString(), {type: blob.type});
@@ -166,26 +168,21 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     }
 
     
-    let uvB = (window.innerWidth / window.innerHeight) * 1.25066;
-    console.log("Heights:");
-    console.log(window.innerWidth);
-    console.log(window.innerHeight);
-    console.log(uvB);
 
     let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
-    //sa_t = 50;
-    var fpsElement = document.getElementById('fps');
-    if (fpsElement) {
-        //fpsElement.innerHTML = "Safe area top: " + sa_t + "<br/>" + "Window height: " + window.innerHeight;
-        fpsElement.innerHTML = "Width: " + window.innerWidth + "<br/>" + "Window height: " + window.innerHeight;
-    }
+    //var fpsElement = document.getElementById('fps');
+    //if (fpsElement) {
+    //    fpsElement.innerHTML = "Width: " + window.innerWidth + "<br/>" + "Window height: " + window.innerHeight;
+    //}
 
-    let uvT = sa_t / window.innerHeight;
-    uvT = 0;
-    console.log(uvT);
+    let uvB = (window.innerWidth * 1.25066) / window.innerHeight;
 
-    var uTop = 1.0 + uvT;
-    var uBottom = 0.0 - ((1 - uvB) * (window.innerHeight / window.innerWidth)) + uvT;
+    var uTop = 1.0;
+    var uBottom = 0.0 - ((1 - uvB) * (1 / uvB));
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+    console.log(1 - uvB);
+
     
     // Create buffer
 
@@ -285,7 +282,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.texImage2D(
         gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
         gl.UNSIGNED_BYTE,
-        imageList[2][0]
+        imageList[1][0]
         );
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     //gl.bindTexture(gl.TEXTURE_2D, null);
