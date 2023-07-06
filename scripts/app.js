@@ -162,6 +162,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     console.log(window.innerHeight);
     console.log(uvB);
 
+    let sa_t = getComputedStyle(document.documentElement).getPropertyValue("--sat");
+    var fpsElement = document.getElementById('fps');
+    if (fpsElement) {
+        fpsElement.innerHTML = "Safe area top: " + sa_t;
+    }
+
     var uTop = 1.0;
     var uBottom = 0.0 - ((1 - uvB) * (window.innerHeight / window.innerWidth));
     
@@ -314,10 +320,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         fpsTri.push(frameTime); // append one
         fpsLastTick = now;
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
-        var fpsElement = document.getElementById('fps')
-        if (fpsElement) {
-            fpsElement.innerHTML = vID;
-        }
+        //var fpsElement = document.getElementById('fps');
+        //if (fpsElement) {
+        //    fpsElement.innerHTML = vID;
+        //}
 
         //if(updateView)
         //gl.bindTexture(gl.TEXTURE_2D, null);
