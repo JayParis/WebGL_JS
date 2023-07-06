@@ -18,6 +18,7 @@ body {
 
 #fps {
     position: fixed;
+    margin-top: 40px;
     color: #ffffff;
 }
 

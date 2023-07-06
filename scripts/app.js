@@ -341,9 +341,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         //gl.finish();
 
-        if (ext) {
-            const info = ext.getMemoryInfo();
-            document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
+        if (ext) { // Memory Info
+            //const info = ext.getMemoryInfo();
+            //document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
         }
 
         requestAnimationFrame(loop);
