@@ -167,13 +167,17 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     
     let uvB = (window.innerWidth / window.innerHeight) * 1.25066;
+    console.log("Heights:");
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
     console.log(uvB);
 
     let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
     //sa_t = 50;
     var fpsElement = document.getElementById('fps');
     if (fpsElement) {
-        fpsElement.innerHTML = "Safe area top: " + sa_t + "<br/>" + "Window height: " + window.innerHeight;
+        //fpsElement.innerHTML = "Safe area top: " + sa_t + "<br/>" + "Window height: " + window.innerHeight;
+        fpsElement.innerHTML = "Width: " + window.innerWidth + "<br/>" + "Window height: " + window.innerHeight;
     }
 
     let uvT = sa_t / window.innerHeight;
