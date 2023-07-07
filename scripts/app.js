@@ -336,8 +336,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
                 width = entry.contentRect.width;
                 height = entry.contentRect.height;
             }
-            const displayWidth = Math.round(width * 1); //dpr
-            const displayHeight = Math.round(height * 1); //dpr
+            const displayWidth = Math.round(width * dpr); //dpr
+            const displayHeight = Math.round(height * dpr); //dpr
             canvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
         }
     }
@@ -396,6 +396,15 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var loop = function() {
 
+        if(previousFrameViewerID != vID){
+            //console.log("Updating Image...");
+            previousFrameViewerID = vID;
+            requestAnimationFrame(loop);
+            return;
+        }
+
+        previousFrameViewerID = vID;
+
         resizeCanvasToDisplaySize(gl.canvas);
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -443,7 +452,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //if(updateView)
         //gl.bindTexture(gl.TEXTURE_2D, null);
 
-        previousFrameViewerID = vID;
+        
+
 
         if(currentHighRes != null)
             nextFrameIsHQ = true;
