@@ -356,7 +356,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             canvas.height = displayHeight;
 
             let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
-            sa_t = 0;
+            sa_t *= (displayHeight / window.innerHeight);
             var correctUV = fitImageToUV(displayWidth, displayHeight, sa_t);
             var uTop = correctUV[0];
             var uBottom = correctUV[1];
