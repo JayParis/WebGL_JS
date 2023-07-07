@@ -425,7 +425,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
                 gl.UNSIGNED_BYTE,
                 nextFrameIsHQ ? currentHighRes : imageList[vID][0]
                 );
-            console.log("Rendering frame");
         }
         
         

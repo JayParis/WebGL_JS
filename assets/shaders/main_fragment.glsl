@@ -24,22 +24,24 @@ void main()
 
    vec4 Color = vec4(0);
 
-   for(float d = 0.0; d<Pi; d += Pi/Directions)
+   if(_dark <= 0.01)
    {
-      for(float i = 1.0 / Quality; i <= 1.001; i += 1.0 / Quality)
+      Color = texture2D(sampler, u_UV);
+   } 
+   else
+   {
+      for(float d = 0.0; d<Pi; d += Pi/Directions)
       {
-         Color += texture2D(sampler, u_UV + vec2(cos(d),sin(d))*Radius*i);		
+         for(float i = 1.0 / Quality; i <= 1.001; i += 1.0 / Quality)
+         {
+            Color += texture2D(sampler, u_UV + vec2(cos(d),sin(d))*Radius*i);		
+         }
       }
+
+      Color /= Quality * Directions + 1.0;
    }
 
-   Color /= Quality * Directions + 1.0;
    Color *= 1.0 - _dark;
-
-   if(_dark <= 0.01){
-      Color = vec4(1.0,0.0,0.0,1.0);
-   } else {
-
-   }
 
    gl_FragColor = vec4(Color.xyz, 1.0);
    //gl_FragColor = vec4(_dark,_dark,_dark, 1.0);
