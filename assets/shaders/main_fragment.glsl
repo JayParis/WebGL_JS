@@ -34,6 +34,13 @@ void main()
 
    Color /= Quality * Directions + 1.0;
    Color *= 1.0 - _dark;
+
+   if(_dark <= 0.01){
+      Color = vec4(1.0,0.0,0.0,1.0);
+   } else {
+
+   }
+
    gl_FragColor = vec4(Color.xyz, 1.0);
    //gl_FragColor = vec4(_dark,_dark,_dark, 1.0);
 }
