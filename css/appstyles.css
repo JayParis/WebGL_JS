@@ -71,8 +71,5 @@ body {
 
 canvas {
     touch-action: none;
-}
-
-canvas:focus {
-    outline: none;
+    display: block;
 }

@@ -411,7 +411,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
         //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
-        gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
+        //gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
 
 
         gl.clearColor(0.75, 0.85, 0.8, 1.0);
