@@ -357,6 +357,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             canvas.height = displayHeight;
 
             let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
+            sa_t = 0;
             var correctUV = fitImageToUV(canvas.width, canvas.height, sa_t);
             var uTop = correctUV[0];
             var uBottom = correctUV[1];
@@ -373,6 +374,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             ];
 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newBoxVertices), gl.STATIC_DRAW);
+
         }
 
         return needResize;
