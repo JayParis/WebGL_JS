@@ -388,7 +388,7 @@ function inputDown(event) {
     targetHoldPosVal = [screenX, screenY];
     
     if(screenY < window.innerHeight * 0.25 && hasInit) {
-        
+        /*
         let end = vID.toString().padStart(4,'0');
         fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
             .then(res => res.blob())
@@ -399,7 +399,7 @@ function inputDown(event) {
                     console.log(currentHighRes);
                 });
             })
-        
+        */
         var canvas = document.getElementById('application');
         var fpsElement = document.getElementById('fps');
         if (fpsElement) {
