@@ -60,31 +60,8 @@ document.addEventListener("mousedown", (event) => {
         loadImageURLs();
         document.getElementById('splash').style.display = 'none';
     }
-    let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
-    var fpsElement = document.getElementById('fps');
-    if (fpsElement) {
-        fpsElement.innerHTML = screenY;
-    }
-    if(screenY < window.innerHeight * 0.25 && hasInit) {
-        /*
-        let end = vID.toString().padStart(4,'0');
-        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
-            .then(res => res.blob())
-            .then(blob => {
-                const file = new File([blob], vID.toString(), {type: blob.type});
-                var newImage = createImageBitmap(file).then(img => {
-                    currentHighRes = img;
-                    console.log(currentHighRes);
-                });
-            })
-        
-        var canvas = document.getElementById('application');
-        var fpsElement = document.getElementById('fps');
-        if (fpsElement) {
-            fpsElement.innerHTML = canvas.clientWidth + " x " + canvas.clientHeight;
-        }
-        */
-    }
+    
+    
 });
 
 async function loadShadersAndRunDemo(){
@@ -410,6 +387,27 @@ function inputDown(event) {
     currentHoldPosVal_Y = screenY;
     targetHoldPosVal = [screenX, screenY];
     
+    if(screenY < window.innerHeight * 0.25 && hasInit) {
+        
+        let end = vID.toString().padStart(4,'0');
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], vID.toString(), {type: blob.type});
+                var newImage = createImageBitmap(file).then(img => {
+                    currentHighRes = img;
+                    console.log(currentHighRes);
+                });
+            })
+        
+        var canvas = document.getElementById('application');
+        var fpsElement = document.getElementById('fps');
+        if (fpsElement) {
+            fpsElement.innerHTML = canvas.clientWidth + " x " + canvas.clientHeight;
+        }
+        
+    }
+
     event.preventDefault();
 }
 
