@@ -60,8 +60,6 @@ document.addEventListener("mousedown", (event) => {
         loadImageURLs();
         document.getElementById('splash').style.display = 'none';
     }
-    
-    
 });
 
 async function loadShadersAndRunDemo(){
@@ -170,6 +168,60 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     }
 
     
+    const canvasToDisplaySizeMap = new Map([[canvas, [750, 938]]]);
+
+    function onResize(entries) {
+        for (const entry of entries) {
+            let width;
+            let height;
+            let dpr = window.devicePixelRatio;
+            if (entry.devicePixelContentBoxSize) {
+                // NOTE: Only this path gives the correct answer
+                // The other 2 paths are an imperfect fallback
+                // for browsers that don't provide anyway to do this
+                width = entry.devicePixelContentBoxSize[0].inlineSize;
+                height = entry.devicePixelContentBoxSize[0].blockSize;
+                dpr = 1; // it's already in width and height
+            } else if (entry.contentBoxSize) {
+                if (entry.contentBoxSize[0]) {
+                    width = entry.contentBoxSize[0].inlineSize;
+                    height = entry.contentBoxSize[0].blockSize;
+                } else {
+                    // legacy
+                    width = entry.contentBoxSize.inlineSize;
+                    height = entry.contentBoxSize.blockSize;
+                }
+            } else {
+                // legacy
+                width = entry.contentRect.width;
+                height = entry.contentRect.height;
+            }
+            const displayWidth = Math.round(width * dpr);
+            const displayHeight = Math.round(height * dpr);
+            canvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
+        }
+    }
+
+    const resizeObserver = new ResizeObserver(onResize);
+    resizeObserver.observe(canvas, {box: 'content-box'});
+
+    function resizeCanvasToDisplaySize(canvas) {
+        // Get the size the browser is displaying the canvas in device pixels.
+        const [displayWidth, displayHeight] = canvasToDisplaySizeMap.get(canvas);
+
+        // Check if the canvas is not the same size.
+        const needResize = canvas.width  !== displayWidth ||
+                            canvas.height !== displayHeight;
+
+        if (needResize) {
+        // Make the canvas the same size
+        canvas.width  = displayWidth;
+        canvas.height = displayHeight;
+        }
+
+        return needResize;
+    }
+
 
     //var fpsElement = document.getElementById('fps');
     //if (fpsElement) {
@@ -306,6 +358,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     //gl.bindTexture(gl.TEXTURE_2D, null);
 
+    
+
     // Main Render Loop
 
     //var identityMatrix = new Float32Array(16);
@@ -317,6 +371,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var loop = function() {
 
+        resizeCanvasToDisplaySize(gl.canvas);
         //currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
         //currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
         //let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
@@ -403,7 +458,7 @@ function inputDown(event) {
         var canvas = document.getElementById('application');
         var fpsElement = document.getElementById('fps');
         if (fpsElement) {
-            fpsElement.innerHTML = canvas.clientWidth + " x " + canvas.clientHeight;
+            fpsElement.innerHTML = canvas.width + " x " + canvas.height;
         }
         
     }
