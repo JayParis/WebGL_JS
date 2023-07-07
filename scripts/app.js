@@ -372,6 +372,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     var loop = function() {
 
         resizeCanvasToDisplaySize(gl.canvas);
+
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        
         //currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
         //currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
         //let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
