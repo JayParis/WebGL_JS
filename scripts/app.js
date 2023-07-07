@@ -25,6 +25,8 @@ var previousViewerID = 0;
 var previousFrameViewerID = 0;
 let vID = 0;
 
+var nextFrameIsHQ = false;
+
 if(isMobile){
     document.addEventListener("touchstart", e => { inputDown(e); });
     document.addEventListener("touchmove", e => { inputMove(e); });
@@ -334,8 +336,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
                 width = entry.contentRect.width;
                 height = entry.contentRect.height;
             }
-            const displayWidth = Math.round(width * dpr);
-            const displayHeight = Math.round(height * dpr);
+            const displayWidth = Math.round(width * 1); //dpr
+            const displayHeight = Math.round(height * 1); //dpr
             canvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
         }
     }
@@ -417,7 +419,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl.texSubImage2D( 
             gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
             gl.UNSIGNED_BYTE,
-            imageList[vID][0]
+            nextFrameIsHQ ? currentHighRes : imageList[vID][0]
             );
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
@@ -442,6 +444,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //gl.bindTexture(gl.TEXTURE_2D, null);
 
         previousFrameViewerID = vID;
+
+        if(currentHighRes != null)
+            nextFrameIsHQ = true;
 
         //gl.finish();
 
@@ -470,14 +475,14 @@ function inputDown(event) {
     
     if(screenY < window.innerHeight * 0.25 && hasInit) {
         /*
-        let end = vID.toString().padStart(4,'0');
-        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
+        let end = "30".padStart(4,'0');
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], vID.toString(), {type: blob.type});
                 var newImage = createImageBitmap(file).then(img => {
                     currentHighRes = img;
-                    console.log(currentHighRes);
+                    console.log("High Res Image Loaded");
                 });
             })
         */
