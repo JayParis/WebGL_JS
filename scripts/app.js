@@ -396,15 +396,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     var loop = function() {
 
-        if(previousFrameViewerID != vID){
-            //console.log("Updating Image...");
-            previousFrameViewerID = vID;
-            requestAnimationFrame(loop);
-            return;
-        }
-
-        previousFrameViewerID = vID;
-
         resizeCanvasToDisplaySize(gl.canvas);
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -424,12 +415,17 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //gl.drawArrays(gl.TRIANGLES, 0, 3);
 
         //grabbedViewerID = targetViewerID;
-
-        gl.texSubImage2D( 
-            gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            nextFrameIsHQ ? currentHighRes : imageList[vID][0]
-            );
+        
+        if(previousFrameViewerID != vID){
+            gl.texSubImage2D( 
+                gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                nextFrameIsHQ ? currentHighRes : imageList[vID][0]
+                );
+            console.log("Rendering frame");
+        }
+        
+        
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
         //gl.activeTexture(gl.TEXTURE0);
@@ -451,9 +447,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         //if(updateView)
         //gl.bindTexture(gl.TEXTURE_2D, null);
-
         
-
+        previousFrameViewerID = vID;
 
         if(currentHighRes != null)
             nextFrameIsHQ = true;
