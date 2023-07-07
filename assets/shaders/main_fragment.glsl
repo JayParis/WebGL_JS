@@ -1,11 +1,12 @@
 precision mediump float;
 
-varying vec2 fragTexCoord;
+varying vec4 fragTexCoord;
 uniform sampler2D sampler;
 
 void main()
 {
-   vec2 v_UV = gl_FragCoord.xy / vec2(500.0,907.0);
+   vec2 v_UV = gl_FragCoord.xy / fragTexCoord.zw;
+   vec2 u_UV = fragTexCoord.xy;
    const float Pi = 6.28318530718;
    
    const float Directions = 16.0;
@@ -27,7 +28,7 @@ void main()
    {
       for(float i = 1.0 / Quality; i <= 1.001; i += 1.0 / Quality)
       {
-         Color += texture2D(sampler, fragTexCoord + vec2(cos(d),sin(d))*Radius*i);		
+         Color += texture2D(sampler, u_UV + vec2(cos(d),sin(d))*Radius*i);		
       }
    }
 

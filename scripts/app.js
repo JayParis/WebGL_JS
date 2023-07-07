@@ -200,19 +200,18 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     var uTop = correctUV[0];
     var uBottom = correctUV[1];
 
-    console.log("Safe Area Top: " + sa_t);
-    console.log("Width: " + canvas.width);
-    console.log("Height: " + canvas.height);
+    
 
     // Create buffer
+
 
     var boxVertices = 
 	[ // X, Y, Z            U, V
 		// Front
-		1.0, 1.0, 1.0,      1.0, 1 - uTop,
-		1.0, -1.0, 1.0,     1.0, 1 - uBottom,
-		-1.0, -1.0, 1.0,    0.0, 1 - uBottom,
-		-1.0, 1.0, 1.0,     0.0, 1 - uTop,
+		1.0, 1.0, 1.0,      1.0, 1 - uTop, canvas.width, canvas.height,
+		1.0, -1.0, 1.0,     1.0, 1 - uBottom, canvas.width, canvas.height,
+		-1.0, -1.0, 1.0,    0.0, 1 - uBottom, canvas.width, canvas.height,
+		-1.0, 1.0, 1.0,     0.0, 1 - uTop, canvas.width, canvas.height,
 	];
 
 	var boxIndices =
@@ -237,16 +236,16 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         3, // Number of elements per attribute
         gl.FLOAT, // type of elements
         gl.FALSE,
-        5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+        7 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
         0 // Offset from the beginning of a single vertex attribute
     );
 
     gl.vertexAttribPointer(
         texCoordAttribLocation,
-        2,
+        4,
         gl.FLOAT,
         gl.FALSE,
-        5 * Float32Array.BYTES_PER_ELEMENT,
+        7 * Float32Array.BYTES_PER_ELEMENT,
         3 * Float32Array.BYTES_PER_ELEMENT 
     );
 
@@ -358,19 +357,23 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
             let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
             sa_t = 0;
-            var correctUV = fitImageToUV(canvas.width, canvas.height, sa_t);
+            var correctUV = fitImageToUV(displayWidth, displayHeight, sa_t);
             var uTop = correctUV[0];
             var uBottom = correctUV[1];
 
             console.log("VertBuffer Updating");
 
+            console.log("Safe Area Top: " + sa_t);
+            console.log("Width: " + displayWidth);
+            console.log("Height: " + displayHeight);
+
             var newBoxVertices = 
             [ // X, Y, Z            U, V
                 // Front
-                1.0, 1.0, 1.0,      1.0, 1 - uTop,
-                1.0, -1.0, 1.0,     1.0, 1 - uBottom,
-                -1.0, -1.0, 1.0,    0.0, 1 - uBottom,
-                -1.0, 1.0, 1.0,     0.0, 1 - uTop,
+                1.0, 1.0, 1.0,      1.0, 1 - uTop, canvas.width, displayHeight,
+                1.0, -1.0, 1.0,     1.0, 1 - uBottom, canvas.width, displayHeight,
+                -1.0, -1.0, 1.0,    0.0, 1 - uBottom, canvas.width, displayHeight,
+                -1.0, 1.0, 1.0,     0.0, 1 - uTop, canvas.width, displayHeight,
             ];
 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newBoxVertices), gl.STATIC_DRAW);
