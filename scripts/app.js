@@ -4,6 +4,7 @@ let hasInit = false;
 
 var imageList = [];
 var bmpOrder = [];
+var currentHighRes = null;
 
 var remoteImagesLoadStep = 1; // 1 for all images, 2 for every other
 
@@ -61,16 +62,23 @@ document.addEventListener("mousedown", (event) => {
     }
     let screenY = isMobile ? event.changedTouches[0].clientY : event.y;
     if(screenY < window.innerHeight * 0.25 && hasInit) {
-        //let path = _supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + vID.toString().padStart(4,'0') + '.webp'
-        //document.getElementById('my-image')
+        /*
+        let end = vID.toString().padStart(4,'0');
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], vID.toString(), {type: blob.type});
+                var newImage = createImageBitmap(file).then(img => {
+                    currentHighRes = img;
+                    console.log(currentHighRes);
+                });
+            })
+        */
         var canvas = document.getElementById('application');
-        var gl = canvas.getContext('webgl2');
-        gl.texSubImage2D( 
-            gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            document.getElementById('my-image')
-            );
-        console.log("Draw high res image");
+        var fpsElement = document.getElementById('fps');
+        if (fpsElement) {
+            fpsElement.innerHTML = canvas.clientWidth + " x " + canvas.clientHeight;
+        }
     }
 });
 
@@ -362,10 +370,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         fpsTri.push(frameTime); // append one
         fpsLastTick = now;
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
-        var fpsElement = document.getElementById('fps');
-        if (fpsElement) {
-            fpsElement.innerHTML = fps;
-        }
+        //var fpsElement = document.getElementById('fps');
+        //if (fpsElement) {
+        //    fpsElement.innerHTML = fps;
+        //}
 
         //if(updateView)
         //gl.bindTexture(gl.TEXTURE_2D, null);
