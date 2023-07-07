@@ -336,8 +336,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
                 width = entry.contentRect.width;
                 height = entry.contentRect.height;
             }
-            const displayWidth = Math.round(width * dpr); //dpr
-            const displayHeight = Math.round(height * dpr); //dpr
+            //const displayWidth = Math.round(width * dpr); //dpr
+            //const displayHeight = Math.round(height * dpr); //dpr
+            const displayWidth = 750;
+            //const displayHeight = parseInt(height * (750 * (height / width)));
+            const displayHeight = parseInt(750 * (height / width));
+
             canvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
         }
     }
