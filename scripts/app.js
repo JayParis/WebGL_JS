@@ -305,7 +305,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     gl.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+        gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
         gl.UNSIGNED_BYTE,
         imageList[1][0]
         );
