@@ -462,8 +462,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             gl.texImage2D(
                 gl.TEXTURE_2D,
                 0,
-                gl.RGBA,
-                gl.RGBA,
+                gl.RGB,
+                gl.RGB,
                 gl.UNSIGNED_BYTE,
                 currentVideo
             );
@@ -475,8 +475,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             gl.texImage2D( 
                 gl.TEXTURE_2D, 
                 0, 
-                gl.RGBA,
-                gl.RGBA,
+                gl.RGB,
+                gl.RGB,
                 gl.UNSIGNED_BYTE,
                 nextFrameIsHQ ? currentHighRes : imageList[vID][0]
                 );
