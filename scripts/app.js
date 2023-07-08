@@ -23,7 +23,11 @@ var targetViewerID = 0;
 var currViewerID = 0;
 var previousViewerID = 0;
 var previousFrameViewerID = 0;
+
 let vID = 0;
+let copyVideo = false;
+let enableVideo = false;
+let needsInvert = false;
 
 var nextFrameIsHQ = false;
 
@@ -305,8 +309,36 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl.UNSIGNED_BYTE,
         imageList[1][0]
         );
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     //gl.bindTexture(gl.TEXTURE_2D, null);
+
+    // Create video texture
+
+    var videoTex = gl.createTexture();
+    /*
+    gl.activeTexture(gl.TEXTURE1);
+    const tempPixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
+    gl.bindTexture(gl.TEXTURE_2D, videoTex);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        1,
+        1,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        tempPixel
+    );
+    
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    */
+    
+
+    var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
 
     const canvasToDisplaySizeMap = new Map([[canvas, [750, 938]]]);
 
@@ -353,7 +385,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         const [displayWidth, displayHeight] = canvasToDisplaySizeMap.get(canvas);
 
         // Check if the canvas is not the same size.
-        const needResize = canvas.width  !== displayWidth || canvas.height !== displayHeight;
+        const needResize = canvas.width  !== displayWidth || canvas.height !== displayHeight || needsInvert;
 
         if (needResize) {
             // Make the canvas the same size
@@ -375,14 +407,14 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             var newBoxVertices = 
             [ // X, Y, Z            U, V
                 // Front
-                1.0, 1.0, 1.0,      1.0, 1 - uTop, canvas.width, displayHeight,
-                1.0, -1.0, 1.0,     1.0, 1 - uBottom, canvas.width, displayHeight,
-                -1.0, -1.0, 1.0,    0.0, 1 - uBottom, canvas.width, displayHeight,
-                -1.0, 1.0, 1.0,     0.0, 1 - uTop, canvas.width, displayHeight,
+                1.0, 1.0, 1.0,      1.0, enableVideo ? uTop : 1 - uTop, canvas.width, displayHeight,
+                1.0, -1.0, 1.0,     1.0, enableVideo ? uBottom : 1 - uBottom, canvas.width, displayHeight,
+                -1.0, -1.0, 1.0,    0.0, enableVideo ? uBottom : 1 - uBottom, canvas.width, displayHeight,
+                -1.0, 1.0, 1.0,     0.0, enableVideo ? uTop : 1 - uTop, canvas.width, displayHeight,
             ];
 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newBoxVertices), gl.STATIC_DRAW);
-
+            needsInvert = false;
         }
 
         return needResize;
@@ -398,6 +430,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     var fpsTri = [15, 15, 15]; // aims for 60fps
 
     var loop = function() {
+        if(previousFrameViewerID != vID && enableVideo) {
+            needsInvert = true;
+            enableVideo = false;
+        }
 
         resizeCanvasToDisplaySize(gl.canvas);
 
@@ -419,14 +455,32 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         //grabbedViewerID = targetViewerID;
         
-        if(previousFrameViewerID != vID){
-            gl.texSubImage2D( 
-                gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
+
+        if (copyVideo && enableVideo) {
+            gl.activeTexture(gl.TEXTURE0);//TEXTURE1
+            gl.bindTexture(gl.TEXTURE_2D, videoTex);
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGBA,
+                gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                currentVideo
+            );
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }else if(previousFrameViewerID != vID && !enableVideo){
+            gl.activeTexture(gl.TEXTURE0);
+            gl.texImage2D( 
+                gl.TEXTURE_2D, 
+                0, 
+                gl.RGBA,
+                gl.RGBA,
                 gl.UNSIGNED_BYTE,
                 nextFrameIsHQ ? currentHighRes : imageList[vID][0]
                 );
         }
-        
         
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
@@ -458,8 +512,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //gl.finish();
 
         if (ext) { // Memory Info
-            //const info = ext.getMemoryInfo();
-            //document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
+            const info = ext.getMemoryInfo();
+            document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
         }
 
         requestAnimationFrame(loop);
@@ -500,7 +554,9 @@ function inputDown(event) {
             fpsElement.innerHTML = canvas.width + " x " + canvas.height + " - " + 
             parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
         }
-        
+
+        needsInvert = true;
+        enableVideo = !enableVideo; // DELETE
     }
 
     event.preventDefault();
@@ -568,3 +624,47 @@ function fitImageToUV(containerWidth, containerHeight, safeArea){
 
     return [uvTop, uvBottom];
 }
+
+function setupVideo(url) {
+    const video = document.createElement("video");
+  
+    let playing = false;
+    let timeupdate = false;
+  
+    video.crossOrigin = "anonymous";
+    video.playsInline = true;
+    video.muted = true;
+    video.loop = true;
+  
+    // Waiting for these 2 events ensures
+    // there is data in the video
+  
+    video.addEventListener(
+      "playing",
+      () => {
+        playing = true;
+        checkReady();
+      },
+      true
+    );
+  
+    video.addEventListener(
+      "timeupdate",
+      () => {
+        timeupdate = true;
+        checkReady();
+      },
+      true
+    );
+  
+    video.src = url;
+    video.play();
+  
+    function checkReady() {
+      if (playing && timeupdate) {
+        copyVideo = true;
+      }
+    }
+  
+    return video;
+  }

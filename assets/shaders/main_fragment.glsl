@@ -27,7 +27,7 @@ void main()
    if(_dark <= 0.01)
    {
       Color = texture2D(sampler, u_UV);
-   } 
+   }
    else
    {
       for(float d = 0.0; d<Pi; d += Pi/Directions)
