@@ -398,6 +398,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             var uTop = correctUV[0];
             var uBottom = correctUV[1];
 
+            let pageBlock = document.getElementById('page-block');
+            let paraOffset = getParaOffset(displayWidth, displayHeight, sa_t) * 0.9;
+            console.log(paraOffset);
+            pageBlock.style.top = (100 * paraOffset).toString() + "vh";
+            pageBlock.style.height = ((1 - paraOffset) * 100).toString() + "vh";
+
             console.log("VertBuffer Updating");
 
             console.log("Safe Area Top: " + sa_t);
@@ -625,6 +631,24 @@ function fitImageToUV(containerWidth, containerHeight, safeArea){
     return [uvTop, uvBottom];
 }
 
+function getParaOffset(containerWidth, containerHeight, safeArea){
+    let pOff;
+    /*
+    let v_B = (containerWidth * 1.25066) / containerHeight;
+    let a_off = ((1 - v_B) * (1 / v_B));
+    let v_T = safeArea / containerHeight;
+    let t_off = (v_T * (1 / v_B));
+
+    pOff = a_off - t_off;
+    */
+    let card_prop = (containerWidth * 1.25066) / containerHeight;;
+    let sa_prop = safeArea / containerHeight;
+
+
+
+    return card_prop + sa_prop;
+}
+
 function setupVideo(url) {
     const video = document.createElement("video");
   
@@ -643,7 +667,7 @@ function setupVideo(url) {
       "playing",
       () => {
         playing = true;
-        console.log("Video wants to play");
+        //console.log("Video wants to play");
         checkReady();
       },
       true
@@ -653,7 +677,7 @@ function setupVideo(url) {
       "timeupdate",
       () => {
         timeupdate = true;
-        console.log("Video wants to update");
+        //console.log("Video wants to update");
         checkReady();
       },
       true

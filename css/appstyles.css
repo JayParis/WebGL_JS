@@ -16,6 +16,33 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+#page-block {
+    position: absolute;
+    display: block;
+    height: 50vh;
+    width: 100vw;
+    top: 50vh;
+    background: none;
+    margin: 0 auto;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 90%);
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+.page-para p {
+    position: relative;
+    display: block;
+    color: #ffffff;
+    margin-left: 8vw;
+    margin-right: 8vw;
+    margin-bottom: 0.3rem;
+    margin-top: 0.3rem;
+    line-height: 1.35rem;
+    text-indent: 20px;
+    font-family: 'STIX Two Text', serif;
+    font-size: 1.05rem;
+}
+
 #fps {
     position: fixed;
     margin-top: 30px;
