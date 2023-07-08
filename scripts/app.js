@@ -643,6 +643,7 @@ function setupVideo(url) {
       "playing",
       () => {
         playing = true;
+        console.log("Video wants to play");
         checkReady();
       },
       true
@@ -652,6 +653,7 @@ function setupVideo(url) {
       "timeupdate",
       () => {
         timeupdate = true;
+        console.log("Video wants to update");
         checkReady();
       },
       true
