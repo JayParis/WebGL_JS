@@ -24,22 +24,8 @@ void main()
 
    vec4 Color = vec4(0);
 
-   if(_dark <= 0.01)
-   {
-      Color = texture2D(sampler, u_UV);
-   }
-   else
-   {
-      for(float d = 0.0; d<Pi; d += Pi/Directions)
-      {
-         for(float i = 1.0 / Quality; i <= 1.001; i += 1.0 / Quality)
-         {
-            Color += texture2D(sampler, u_UV + vec2(cos(d),sin(d))*Radius*i);		
-         }
-      }
+   Color = texture2D(sampler, u_UV);
 
-      Color /= Quality * Directions + 1.0;
-   }
 
    Color *= 1.0 - _dark;
 
