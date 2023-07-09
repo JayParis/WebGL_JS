@@ -25,7 +25,7 @@ body {
     background: none;
     margin: 0 auto;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 82%);
     mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
 }
 
@@ -33,14 +33,15 @@ body {
     position: relative;
     display: block;
     color: #ffffff;
-    margin-left: 10vw;
-    margin-right: 10vw;
+    margin-left: 11vw;
+    margin-right: 11vw;
     margin-bottom: 0.3rem;
     margin-top: 0.3rem;
     line-height: 1.35rem;
     text-indent: 20px;
     font-family: 'STIX Two Text', serif;
     font-size: 1.0rem;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4);
 }
 
 #fps {

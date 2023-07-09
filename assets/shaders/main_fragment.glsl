@@ -17,7 +17,7 @@ void main()
    float _blur = bm_t + bm_b;
 
    float dm_t = smoothstep(0.9,1.0,v_UV.y) * 0.7;
-   float dm_b = smoothstep(0.5,0.0,v_UV.y) * 0.9;
+   float dm_b = smoothstep(0.5,0.0,v_UV.y) * 0.79;
    float _dark = dm_t + dm_b;
 
    float Radius = 0.025 * _blur;
