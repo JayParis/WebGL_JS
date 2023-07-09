@@ -26,7 +26,7 @@ body {
     margin: 0 auto;
     overflow: hidden;
     -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 82%);
-    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 82%);
 }
 
 .page-para p {
