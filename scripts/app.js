@@ -131,16 +131,11 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     const ext = gl.getExtension('GMAN_webgl_memory');
     
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // <img> tag flips images
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // <img> tag flips images, and also affects video?
 
     gl.clearColor(0.75, 0.85, 0.8, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    /*
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.frontFace(gl.CCW);
-    gl.cullFace(gl.BACK);
-    */
+
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
@@ -173,43 +168,15 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         return;
     }
 
-    
-    
+    gl.useProgram(program);
 
-
-    //var fpsElement = document.getElementById('fps');
-    //if (fpsElement) {
-    //    fpsElement.innerHTML = "Width: " + window.innerWidth + "<br/>" + "Window height: " + window.innerHeight;
-    //}
-
-
-    // OLD
-    /*
-    let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
-    sa_t = 100;
-    let uvB = (window.innerWidth * 1.25066) / window.innerHeight;
-    let aspectOffset = ((1 - uvB) * (1 / uvB));
-    let uvT = sa_t / window.innerHeight;
-    let topOffset = (uvT * (1 / uvB));
-
-    var uTop = 1.0 + topOffset;
-    var uBottom = (-aspectOffset) + topOffset;
-
-    console.log(window.innerWidth);
-    console.log(window.innerHeight);
-    console.log(1 - uvB);
-    console.log("UVT: " + uvT);
-    */
 
     let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
     var correctUV = fitImageToUV(canvas.width, canvas.height, sa_t);
     var uTop = correctUV[0];
     var uBottom = correctUV[1];
 
-    
-
     // Create buffer
-
 
     var boxVertices = 
 	[ // X, Y, Z            U, V
@@ -259,25 +226,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.enableVertexAttribArray(texCoordAttribLocation);
 
 
-    // Create texture
-    /*
-    var boxTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); //MIRRORED_REPEAT
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D( 
-        gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        imageList[currViewerID][0]
-        );
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    */
-
-
-    gl.useProgram(program); // Needs to know the program by this point
-
     var matWorldUniformLocation = gl.getUniformLocation(program, 'mWorld');
     var matViewUniformLocation = gl.getUniformLocation(program, 'mView');
     var matProjUniformLocation = gl.getUniformLocation(program, 'mProj');
@@ -296,7 +244,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
     gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 
-    //let updateView = vID != previousFrameViewerID;
     var boxTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); // MIRRORED_REPEAT
@@ -315,30 +262,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     // Create video texture
 
-    var videoTex = gl.createTexture();
-    /*
-    gl.activeTexture(gl.TEXTURE1);
-    const tempPixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
-    gl.bindTexture(gl.TEXTURE_2D, videoTex);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        1,
-        1,
-        0,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        tempPixel
-    );
-    
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    */
-    
-
+    //var videoTex = gl.createTexture();
     var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
+
+    // Resize observer
 
     const canvasToDisplaySizeMap = new Map([[canvas, [750, 938]]]);
 
@@ -428,10 +355,6 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
     // Main Render Loop
 
-    //var identityMatrix = new Float32Array(16);
-    //mat4.identity(identityMatrix);
-    //var angle = 0;
-
     var fpsLastTick = new Date().getTime();
     var fpsTri = [15, 15, 15]; // aims for 60fps
 
@@ -445,26 +368,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-        //currentHoldPosVal_X = MoveTowards(currentHoldPosVal_X, targetHoldPosVal[0], 1.05);
-        //currentHoldPosVal_Y = MoveTowards(currentHoldPosVal_Y, targetHoldPosVal[1], 1.05);
-        //let currentCoord = [currentHoldPosVal_X, currentHoldPosVal_Y];
-
-
-        //angle = performance.now() / 1000 / 6 * 2 * Math.PI;
-        //mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0]);
-        //gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
-
-
         gl.clearColor(0.75, 0.85, 0.8, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        //gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-        //grabbedViewerID = targetViewerID;
-        
 
         if (copyVideo && enableVideo) {
             gl.activeTexture(gl.TEXTURE0);//TEXTURE1
-            gl.bindTexture(gl.TEXTURE_2D, videoTex);
+            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
             gl.texImage2D(
                 gl.TEXTURE_2D,
                 0,
@@ -506,20 +415,15 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         //if (fpsElement) {
         //    fpsElement.innerHTML = fps;
         //}
-
-        //if(updateView)
-        //gl.bindTexture(gl.TEXTURE_2D, null);
         
         previousFrameViewerID = vID;
 
         if(currentHighRes != null)
             nextFrameIsHQ = true;
 
-        //gl.finish();
-
         if (ext) { // Memory Info
-            //const info = ext.getMemoryInfo();
-            //document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
+            const info = ext.getMemoryInfo();
+            document.querySelector('#info').textContent = JSON.stringify(info, null, 2);
         }
 
         requestAnimationFrame(loop);
@@ -632,19 +536,8 @@ function fitImageToUV(containerWidth, containerHeight, safeArea){
 }
 
 function getParaOffset(containerWidth, containerHeight, safeArea){
-    let pOff;
-    /*
-    let v_B = (containerWidth * 1.25066) / containerHeight;
-    let a_off = ((1 - v_B) * (1 / v_B));
-    let v_T = safeArea / containerHeight;
-    let t_off = (v_T * (1 / v_B));
-
-    pOff = a_off - t_off;
-    */
     let card_prop = (containerWidth * 1.25066) / containerHeight;;
     let sa_prop = safeArea / containerHeight;
-
-
 
     return card_prop + sa_prop;
 }
