@@ -3,32 +3,28 @@ precision mediump float;
 varying vec4 fragTexCoord;
 uniform sampler2D sampler;
 
-void main()
+float textureSizeWidth = 750.0;
+float textureSizeHeight = 938.0;
+float texelSizeX = (1.0 / (textureSizeWidth / 8.0));
+float texelSizeY = (1.0 / (textureSizeHeight / 8.0));
+
+vec4 tex2DBiLinear( sampler2D textureSampler_i, vec2 texCoord_i )
 {
-   vec2 v_UV = gl_FragCoord.xy / fragTexCoord.zw;
-   vec2 u_UV = fragTexCoord.xy;
-   const float Pi = 6.28318530718;
-   
-   const float Directions = 16.0;
-   const float Quality = 4.0;
+   vec4 p0q0 = texture2D(textureSampler_i, texCoord_i);
+   vec4 p1q0 = texture2D(textureSampler_i, texCoord_i + vec2(texelSizeX, 0));
 
-   float bm_t = smoothstep(0.9,1.0,v_UV.y);
-   float bm_b = smoothstep(0.5,0.0,v_UV.y);
-   float _blur = bm_t + bm_b;
+   vec4 p0q1 = texture2D(textureSampler_i, texCoord_i + vec2(0, texelSizeY));
+   vec4 p1q1 = texture2D(textureSampler_i, texCoord_i + vec2(texelSizeX , texelSizeY));
 
-   float dm_t = smoothstep(0.9,1.0,v_UV.y) * 0.7;
-   float dm_b = smoothstep(0.5,0.0,v_UV.y) * 0.79;
-   float _dark = dm_t + dm_b;
+   float a = fract( texCoord_i.x * textureSizeWidth );
 
-   float Radius = 0.025 * _blur;
+   vec4 pInterp_q0 = mix( p0q0, p1q0, a );
+   vec4 pInterp_q1 = mix( p0q1, p1q1, a );
 
-   vec4 Color = vec4(0);
+   float b = fract( texCoord_i.y * textureSizeHeight );
+   return mix( pInterp_q0, pInterp_q1, b );
+}
+void main() { 
 
-   Color = texture2D(sampler, u_UV);
-
-
-   Color *= 1.0 - _dark;
-
-   gl_FragColor = vec4(Color.xyz, 1.0);
-   //gl_FragColor = vec4(_dark,_dark,_dark, 1.0);
+   gl_FragColor = tex2DBiLinear(sampler,fragTexCoord.xy);
 }
