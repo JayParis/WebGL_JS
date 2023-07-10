@@ -265,7 +265,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
     //gl.activeTexture(gl.TEXTURE0);
 
     const targetTextureWidth = 750;
-    const targetTextureHeight = 938;
+    const targetTextureHeight = 938; //938
     const targetTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, targetTexture);
 
@@ -499,7 +499,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
                 -1.0, -1.0, 1.0,    0.0, enableVideo ? uBottom : 1 - uBottom, canvas.width, displayHeight,
                 -1.0, 1.0, 1.0,     0.0, enableVideo ? uTop : 1 - uTop, canvas.width, displayHeight,
             ];
-
+            gl.useProgram(mainProgram);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newBoxVertices), gl.STATIC_DRAW);
+            gl.useProgram(blurProgram);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newBoxVertices), gl.STATIC_DRAW);
             needsInvert = false;
         }
@@ -520,7 +522,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
 
         resizeCanvasToDisplaySize(gl.canvas);
 
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
         gl.clearColor(0.75, 0.85, 0.8, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -540,23 +542,48 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         }else if(previousFrameViewerID != vID && !enableVideo){
-            gl.useProgram(mainProgram);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.texImage2D( 
-                gl.TEXTURE_2D, 
-                0, 
-                gl.RGBA,
-                gl.RGBA,
-                gl.UNSIGNED_BYTE,
-                nextFrameIsHQ ? currentHighRes : imageList[vID][0]
-                );
+            
+
         }
+
+        gl.useProgram(mainProgram);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        gl.texImage2D( 
+            gl.TEXTURE_2D, 
+            0, 
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            nextFrameIsHQ ? currentHighRes : imageList[vID][0]
+            );
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+        //gl.drawArrays(gl.TRIANGLES, 0, 6 * 6);
+        //gl.drawArrays(gl.POINTS, 0, 1);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb); //fb
+        gl.useProgram(blurProgram);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+        gl.uniform1i(textureLocation, 0);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null); //fb
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        gl.uniform1i(textureLocation_2, 1);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+
         
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
         //gl.activeTexture(gl.TEXTURE0);
         
-        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+        //gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
         
 
         // update fps at last

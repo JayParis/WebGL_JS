@@ -27,7 +27,11 @@ vec4 tex2DBiLinear( sampler2D textureSampler_i, vec2 texCoord_i )
 }
 void main() 
 { 
-   vec2 FBOflipUV = vec2(fragTexCoord.x,1.0 - fragTexCoord.y);
-   gl_FragColor = tex2DBiLinear(sampler_2,FBOflipUV);
+   //vec2 v_UV = gl_FragCoord.xy / fragTexCoord.zw;
+   vec2 v_UV = gl_FragCoord.xy / vec2(textureSizeWidth, textureSizeHeight);
+
+
+   vec2 FBOflipUV = vec2(fragTexCoord.x,fragTexCoord.y);
+   gl_FragColor = tex2DBiLinear(sampler_2,v_UV);
    //gl_FragColor = texture2D(sampler_1,fragTexCoord.xy);
 }

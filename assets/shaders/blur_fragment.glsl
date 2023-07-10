@@ -10,6 +10,11 @@ float texelSizeX = (1.0 / (textureSizeWidth / 8.0));
 float texelSizeY = (1.0 / (textureSizeHeight / 8.0));
 
 void main() { 
+
+   vec2 v_UV = gl_FragCoord.xy / fragTexCoord.zw;
+
+   vec2 FBOflipUV = vec2(fragTexCoord.x, 1.0 - fragTexCoord.y);
+
    vec4 tex_1 = texture2D(sampler_1,fragTexCoord.xy);
    vec4 tex_2 = texture2D(sampler_2,fragTexCoord.xy);
 
