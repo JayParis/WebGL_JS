@@ -74,9 +74,11 @@ async function loadShadersAndRunDemo(){
         .then(result => result.text());
     const fragmentShaderText = await fetch('./assets/shaders/main_fragment.glsl')
         .then(result => result.text());
+    const blurShaderText = await fetch('./assets/shaders/blur_fragment.glsl')
+        .then(result => result.text());
     
     hasInit = true;
-    RunDemo(vertexShaderText,fragmentShaderText);
+    RunDemo(vertexShaderText,fragmentShaderText,blurShaderText);
 }
 
 function loadImageURLs(){
@@ -119,7 +121,7 @@ function allImagesReady(){
     loadShadersAndRunDemo();
 }
 
-var RunDemo = function(vertexShaderText, fragmentShaderText) {
+var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
 
     var canvas = document.getElementById('application');
     var gl = canvas.getContext('webgl2');
@@ -128,7 +130,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         gl = canvas.getContext('experimental-webgl');
     }
 
-    const ext = gl.getExtension('GMAN_webgl_memory');
+    const ext = gl.getExtension('GMAN_webgl_memory'); // Memory Extension
     
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // <img> tag flips images, and also affects video?
@@ -153,23 +155,25 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
         return;
     }
 
-    var program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
-        console.error("ERROR linking program", gl.getProgramInfoLog(program));
+    // Create main program
+    
+        
+    var mainProgram = gl.createProgram();
+    gl.attachShader(mainProgram, vertexShader);
+    gl.attachShader(mainProgram, fragmentShader);
+    gl.linkProgram(mainProgram);
+    if(!gl.getProgramParameter(mainProgram, gl.LINK_STATUS)){
+        console.error("ERROR linking main program", gl.getProgramInfoLog(mainProgram));
         return;
     }
 
-    gl.validateProgram(program); //Expensive, remove in release
-    if(!gl.getProgramParameter(program, gl.VALIDATE_STATUS)){
-        console.error("ERROR validating program", gl.getProgramInfoLog(program));
+    gl.validateProgram(mainProgram); //Expensive, remove in release
+    if(!gl.getProgramParameter(mainProgram, gl.VALIDATE_STATUS)){
+        console.error("ERROR validating main program", gl.getProgramInfoLog(mainProgram));
         return;
     }
 
-    gl.useProgram(program);
-
+    gl.useProgram(mainProgram);
 
     let sa_t = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
     var correctUV = fitImageToUV(canvas.width, canvas.height, sa_t);
@@ -202,8 +206,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW);
 
-    var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
-    var texCoordAttribLocation = gl.getAttribLocation(program, 'vertTexCoord');
+    var positionAttribLocation = gl.getAttribLocation(mainProgram, 'vertPosition');
+    var texCoordAttribLocation = gl.getAttribLocation(mainProgram, 'vertTexCoord');
     gl.vertexAttribPointer(
         positionAttribLocation, // Attributes location
         3, // Number of elements per attribute
@@ -226,9 +230,9 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.enableVertexAttribArray(texCoordAttribLocation);
 
 
-    var matWorldUniformLocation = gl.getUniformLocation(program, 'mWorld');
-    var matViewUniformLocation = gl.getUniformLocation(program, 'mView');
-    var matProjUniformLocation = gl.getUniformLocation(program, 'mProj');
+    var matWorldUniformLocation = gl.getUniformLocation(mainProgram, 'mWorld');
+    var matViewUniformLocation = gl.getUniformLocation(mainProgram, 'mView');
+    var matProjUniformLocation = gl.getUniformLocation(mainProgram, 'mProj');
     
     var worldMatrix = new Float32Array(16); 
     var viewMatrix = new Float32Array(16); 
@@ -244,6 +248,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
     gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 
+    
+
     var boxTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, boxTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); // MIRRORED_REPEAT
@@ -252,15 +258,163 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     gl.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
+        gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
         gl.UNSIGNED_BYTE,
-        imageList[1][0]
+        imageList[1][0] //imageList[1][0]
         );
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-    //gl.bindTexture(gl.TEXTURE_2D, null);
+    //gl.activeTexture(gl.TEXTURE0);
 
-    // Create video texture
+    const targetTextureWidth = 750;
+    const targetTextureHeight = 938;
+    const targetTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+    // define size and format of level 0
+    const lv = 0;
+    const internalFormat = gl.RGBA;
+    const border = 0;
+    const format = gl.RGBA;
+    const type = gl.UNSIGNED_BYTE;
+    const data = null;
+    gl.texImage2D(gl.TEXTURE_2D, lv, internalFormat,
+                  targetTextureWidth, targetTextureHeight, border,
+                  format, type, data);
+
+    // set the filtering so we don't need mips
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+    // Create and bind the framebuffer
+    
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+    // attach the texture as the first color attachment
+    const attachmentPoint = gl.COLOR_ATTACHMENT0;
+    const level = 0;
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, targetTexture, level);
+    
+    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+
+    gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+
+    //return;
+    // Create blur program
+    
+        var blurShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+        gl.shaderSource(vertexShader, vertexShaderText);
+        gl.shaderSource(blurShader, blurShaderText);
+
+        gl.compileShader(blurShader);
+        if(!gl.getShaderParameter(blurShader,gl.COMPILE_STATUS)){
+            console.error("ERROR compiling blur shader");
+            return;
+        }
+
+        var blurProgram = gl.createProgram();
+        gl.attachShader(blurProgram, vertexShader);
+        gl.attachShader(blurProgram, blurShader);
+        gl.linkProgram(blurProgram);
+        if(!gl.getProgramParameter(blurProgram, gl.LINK_STATUS)){
+            console.error("ERROR linking main program", gl.getProgramInfoLog(blurProgram));
+            return;
+        }
+    
+        gl.validateProgram(blurProgram); //Expensive, remove in release
+        if(!gl.getProgramParameter(blurProgram, gl.VALIDATE_STATUS)){
+            console.error("ERROR validating main program", gl.getProgramInfoLog(blurProgram));
+            return;
+        }
+
+        gl.useProgram(blurProgram);
+    
+        var blurVertexBufferObject = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, blurVertexBufferObject);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW);
+    
+        var blurIndexBufferObject = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, blurIndexBufferObject);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW);
+    
+        var blurPositionAttribLocation = gl.getAttribLocation(blurProgram, 'vertPosition');
+        var blurTexCoordAttribLocation = gl.getAttribLocation(blurProgram, 'vertTexCoord');
+        gl.vertexAttribPointer(
+            blurPositionAttribLocation, // Attributes location
+            3, // Number of elements per attribute
+            gl.FLOAT, // type of elements
+            gl.FALSE,
+            7 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+            0 // Offset from the beginning of a single vertex attribute
+        );
+    
+        gl.vertexAttribPointer(
+            blurTexCoordAttribLocation,
+            4,
+            gl.FLOAT,
+            gl.FALSE,
+            7 * Float32Array.BYTES_PER_ELEMENT,
+            3 * Float32Array.BYTES_PER_ELEMENT 
+        );
+    
+        gl.enableVertexAttribArray(blurPositionAttribLocation);
+        gl.enableVertexAttribArray(blurTexCoordAttribLocation);
+    
+    
+        var blurMatWorldUniformLocation = gl.getUniformLocation(blurProgram, 'mWorld');
+        var blurMatViewUniformLocation = gl.getUniformLocation(blurProgram, 'mView');
+        var blurMatProjUniformLocation = gl.getUniformLocation(blurProgram, 'mProj');
+        
+        var blurWorldMatrix = new Float32Array(16); 
+        var blurViewMatrix = new Float32Array(16); 
+        var blurProjMatrix = new Float32Array(16); 
+        //mat4.identity(worldMatrix);
+        //mat4.lookAt(viewMatrix, [0,0,-7], [0,0,0], [0,1,0]);
+        //mat4.perspective(projMatrix, glMatrix.toRadian(45), canvas.width / canvas.height, 0.1, 1000.0);
+        mat4.identity(blurWorldMatrix);
+        mat4.identity(blurViewMatrix);
+        mat4.identity(blurProjMatrix);
+    
+        gl.uniformMatrix4fv(blurMatWorldUniformLocation, gl.FALSE, blurWorldMatrix);
+        gl.uniformMatrix4fv(blurMatViewUniformLocation, gl.FALSE, blurViewMatrix);
+        gl.uniformMatrix4fv(blurMatProjUniformLocation, gl.FALSE, blurProjMatrix);
+
+
+        //gl.activeTexture(gl.TEXTURE1);
+        var blurTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, blurTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT); // MIRRORED_REPEAT
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null); //fb
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+        var textureLocation = gl.getUniformLocation(blurProgram, "sampler_1");
+        gl.uniform1i(textureLocation, 0);
+        
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        var textureLocation_2 = gl.getUniformLocation(blurProgram, "sampler_2");
+        gl.uniform1i(textureLocation_2, 1);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        /*
+        gl.texImage2D(
+            gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
+            gl.UNSIGNED_BYTE,
+            imageList[1][0]
+            );
+            gl.activeTexture(gl.TEXTURE0);
+        */
+        
+    //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+    
+
+    // Create video element
 
     //var videoTex = gl.createTexture();
     var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
@@ -354,7 +508,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
     }
 
     // Main Render Loop
-
+    //return;
     var fpsLastTick = new Date().getTime();
     var fpsTri = [15, 15, 15]; // aims for 60fps
 
@@ -377,8 +531,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             gl.texImage2D(
                 gl.TEXTURE_2D,
                 0,
-                gl.RGB,
-                gl.RGB,
+                gl.RGBA,
+                gl.RGBA,
                 gl.UNSIGNED_BYTE,
                 currentVideo
             );
@@ -386,12 +540,13 @@ var RunDemo = function(vertexShaderText, fragmentShaderText) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         }else if(previousFrameViewerID != vID && !enableVideo){
+            gl.useProgram(mainProgram);
             gl.activeTexture(gl.TEXTURE0);
             gl.texImage2D( 
                 gl.TEXTURE_2D, 
                 0, 
-                gl.RGB,
-                gl.RGB,
+                gl.RGBA,
+                gl.RGBA,
                 gl.UNSIGNED_BYTE,
                 nextFrameIsHQ ? currentHighRes : imageList[vID][0]
                 );

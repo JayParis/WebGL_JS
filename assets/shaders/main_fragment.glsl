@@ -1,7 +1,8 @@
 precision mediump float;
 
 varying vec4 fragTexCoord;
-uniform sampler2D sampler;
+uniform sampler2D sampler_1;
+uniform sampler2D sampler_2;
 
 float textureSizeWidth = 750.0;
 float textureSizeHeight = 938.0;
@@ -24,7 +25,9 @@ vec4 tex2DBiLinear( sampler2D textureSampler_i, vec2 texCoord_i )
    float b = fract( texCoord_i.y * textureSizeHeight );
    return mix( pInterp_q0, pInterp_q1, b );
 }
-void main() { 
-
-   gl_FragColor = tex2DBiLinear(sampler,fragTexCoord.xy);
+void main() 
+{ 
+   vec2 FBOflipUV = vec2(fragTexCoord.x,1.0 - fragTexCoord.y);
+   gl_FragColor = tex2DBiLinear(sampler_2,FBOflipUV);
+   //gl_FragColor = texture2D(sampler_1,fragTexCoord.xy);
 }
