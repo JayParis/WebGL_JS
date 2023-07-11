@@ -515,7 +515,8 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
     var fpsTri = [15, 15, 15]; // aims for 60fps
 
     var loop = function() {
-        if(previousFrameViewerID != vID && enableVideo) {
+        let isNewFrame = previousFrameViewerID != vID;
+        if(isNewFrame && enableVideo) {
             needsInvert = true;
             enableVideo = false;
         }
@@ -523,62 +524,63 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         resizeCanvasToDisplaySize(gl.canvas);
 
         //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        if(isNewFrame)
+        {
+            gl.clearColor(0.75, 0.85, 0.8, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.clearColor(0.75, 0.85, 0.8, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            if (copyVideo && enableVideo) {
+                gl.activeTexture(gl.TEXTURE0);//TEXTURE1
+                gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.RGBA,
+                    gl.RGBA,
+                    gl.UNSIGNED_BYTE,
+                    currentVideo
+                );
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            }else if(previousFrameViewerID != vID && !enableVideo){
+                
 
-        if (copyVideo && enableVideo) {
-            gl.activeTexture(gl.TEXTURE0);//TEXTURE1
+            }
+
+            gl.useProgram(mainProgram);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-            gl.texImage2D(
-                gl.TEXTURE_2D,
-                0,
+            gl.texImage2D( 
+                gl.TEXTURE_2D, 
+                0, 
                 gl.RGBA,
                 gl.RGBA,
                 gl.UNSIGNED_BYTE,
-                currentVideo
-            );
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        }else if(previousFrameViewerID != vID && !enableVideo){
-            
+                nextFrameIsHQ ? currentHighRes : imageList[vID][0]
+                );
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
+            //gl.drawArrays(gl.TRIANGLES, 0, 6 * 6);
+            //gl.drawArrays(gl.POINTS, 0, 1);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb); //fb
+            gl.useProgram(blurProgram);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+            gl.uniform1i(textureLocation, 0);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null); //fb
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+            gl.uniform1i(textureLocation_2, 1);
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+            gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 
         }
-
-        gl.useProgram(mainProgram);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-        gl.texImage2D( 
-            gl.TEXTURE_2D, 
-            0, 
-            gl.RGBA,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            nextFrameIsHQ ? currentHighRes : imageList[vID][0]
-            );
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
-        //gl.drawArrays(gl.TRIANGLES, 0, 6 * 6);
-        //gl.drawArrays(gl.POINTS, 0, 1);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fb); //fb
-        gl.useProgram(blurProgram);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, targetTexture);
-        gl.uniform1i(textureLocation, 0);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null); //fb
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
-        gl.uniform1i(textureLocation_2, 1);
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-
-        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
-
-        
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
         //gl.activeTexture(gl.TEXTURE0);
@@ -593,10 +595,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         fpsTri.push(frameTime); // append one
         fpsLastTick = now;
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
-        //var fpsElement = document.getElementById('fps');
-        //if (fpsElement) {
-        //    fpsElement.innerHTML = fps;
-        //}
+        var fpsElement = document.getElementById('fps');
+        if (fpsElement) {
+            fpsElement.innerHTML = fps;
+        }
         
         previousFrameViewerID = vID;
 
@@ -642,9 +644,8 @@ function inputDown(event) {
         var canvas = document.getElementById('application');
         var fpsElement = document.getElementById('fps');
         if (fpsElement) {
-            //fpsElement.innerHTML = canvas.width + " x " + canvas.height;
-            fpsElement.innerHTML = canvas.width + " x " + canvas.height + " - " + 
-            parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
+            //fpsElement.innerHTML = canvas.width + " x " + canvas.height + " - " + 
+            //parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
         }
 
         needsInvert = true;
