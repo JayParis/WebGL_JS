@@ -13,11 +13,11 @@ void main() {
    vec2 v_UV = gl_FragCoord.xy / fragTexCoord.zw;
 
    float bm_t = smoothstep(0.9,1.0,v_UV.y);
-   float bm_b = smoothstep(0.5,0.0,v_UV.y);
+   float bm_b = smoothstep(0.6,0.20,v_UV.y);
    float _blur = bm_t + bm_b;
 
    float dm_t = smoothstep(0.9,1.0,v_UV.y) * 0.7;
-   float dm_b = smoothstep(0.5,0.0,v_UV.y) * 0.79;
+   float dm_b = smoothstep(0.5,0.05,v_UV.y) * 0.79;
    float _dark = dm_t + dm_b;
 
    const float Pi = 6.28318530718;
@@ -55,4 +55,5 @@ void main() {
    vec3 FinalColour = mix(tex_2,Color, _blur).xyz;
 
    gl_FragColor = vec4(FinalColour * (1.0 - _dark), 1.0);
+   //gl_FragColor = vec4(_blur,_blur,_blur, 1.0);
 }

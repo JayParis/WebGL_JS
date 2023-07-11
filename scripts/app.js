@@ -418,7 +418,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
 
     //var videoTex = gl.createTexture();
 
-    //var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
+    var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
 
     
     // Resize observer
@@ -526,12 +526,12 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         resizeCanvasToDisplaySize(gl.canvas);
 
         //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        if(isNewFrame)
+        if(isNewFrame || copyVideo)
         {
             gl.clearColor(0.75, 0.85, 0.8, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            if (copyVideo && enableVideo) {
+            if (copyVideo && enableVideo && false) {
                 gl.activeTexture(gl.TEXTURE0);//TEXTURE1
                 gl.bindTexture(gl.TEXTURE_2D, boxTexture);
                 gl.texImage2D(
@@ -560,7 +560,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
                 gl.RGBA,
                 gl.RGBA,
                 gl.UNSIGNED_BYTE,
-                nextFrameIsHQ ? currentHighRes : imageList[vID][0]
+                copyVideo && enableVideo ? currentVideo : (nextFrameIsHQ ? currentHighRes : imageList[vID][0])
                 );
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
