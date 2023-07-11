@@ -417,8 +417,10 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
     // Create video element
 
     //var videoTex = gl.createTexture();
-    var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
 
+    //var currentVideo = setupVideo("https://cfzcrwfmlxquedvdajiw.supabase.co/storage/v1/object/public/main-pages/Video/Video_F0001_1500.mp4");
+
+    
     // Resize observer
 
     const canvasToDisplaySizeMap = new Map([[canvas, [750, 938]]]);
