@@ -591,6 +591,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         
 
         // update fps at last
+        /*
         var now = new Date().getTime();
         var frameTime = (now - fpsLastTick);
         fpsTri.shift(); // drop one
@@ -598,6 +599,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         fpsLastTick = now;
         fps = Math.floor(3000 / (fpsTri[0] + fpsTri[1] + fpsTri[2])); // mean of 3
         var fpsElement = document.getElementById('fps');
+        */
         //if (fpsElement) {
         //    fpsElement.innerHTML = fps;
         //}
