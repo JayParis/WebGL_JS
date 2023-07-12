@@ -526,7 +526,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
         resizeCanvasToDisplaySize(gl.canvas);
 
         //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        if(isNewFrame || copyVideo)
+        if(isNewFrame || (copyVideo && enableVideo))
         {
             gl.clearColor(0.75, 0.85, 0.8, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -579,9 +579,7 @@ var RunDemo = function(vertexShaderText, fragmentShaderText, blurShaderText) {
             gl.uniform1i(textureLocation_2, 1);
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-
             gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
-
         }
         //gl.bindTexture(gl.TEXTURE_2D, boxTexture);
         
@@ -645,12 +643,7 @@ function inputDown(event) {
                 });
             })
         */
-        var canvas = document.getElementById('application');
-        var fpsElement = document.getElementById('fps');
-        if (fpsElement) {
-            //fpsElement.innerHTML = canvas.width + " x " + canvas.height + " - " + 
-            //parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sat"));
-        }
+        
 
         needsInvert = true;
         enableVideo = !enableVideo; // DELETE
@@ -681,6 +674,10 @@ function inputMove(event) {
 
 function inputUp(event) {
     inputting = false;
+    if(vID % 2 != 0){
+        vID++;
+    }
+
     previousViewerID = vID;
 
     let screenX = isMobile ? event.changedTouches[0].clientX : event.x;
@@ -690,6 +687,12 @@ function inputUp(event) {
     currentHoldPosVal_Y = screenY;
 
     targetHoldPosVal = [screenX, screenY];
+
+    var canvas = document.getElementById('application');
+    var fpsElement = document.getElementById('fps');
+    if (fpsElement) {
+        fpsElement.innerHTML = "vID: " + vID;
+    }
 
     if(hasInit)
         console.log(imageList.length);

@@ -6,8 +6,8 @@ uniform sampler2D sampler_2;
 
 float textureSizeWidth = 750.0;
 float textureSizeHeight = 938.0;
-float texelSizeX = (1.0 / (textureSizeWidth / 8.0));
-float texelSizeY = (1.0 / (textureSizeHeight / 8.0));
+float texelSizeX = (1.0 / (textureSizeWidth / 16.0)); //8.0
+float texelSizeY = (1.0 / (textureSizeHeight / 16.0));
 
 vec4 tex2DBiLinear( sampler2D textureSampler_i, vec2 texCoord_i )
 {

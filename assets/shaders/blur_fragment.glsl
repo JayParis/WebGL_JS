@@ -26,6 +26,7 @@ void main() {
    const float Quality = 4.0;
 
    float Radius = 0.025 * _blur * 2.0;
+   //float Radius = 0.025 * 2.0;
 
    vec4 Color = vec4(0);
 
