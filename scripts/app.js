@@ -84,7 +84,7 @@ async function loadShadersAndRunDemo(){
 function loadImageURLs(){
     for (let i = 1; i <= 160; i += remoteImagesLoadStep) { //160
         let end = i.toString().padStart(4,'0');
-        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/750/Page_1_Main_' + end + '.webp')
+        fetch(_supabaseUrl + '/storage/v1/object/public/main-pages/Page_1_Main_' + end + '.webp')
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], i.toString(), {type: blob.type});
