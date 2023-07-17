@@ -9,6 +9,12 @@
             "request": "launch",
             "name": "Open index.html",
             "url": "http://localhost:8080",
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
+            "name": "Open Firefox to index.html",
+            "url": "http://localhost:8080",
         }
     ]
 }
